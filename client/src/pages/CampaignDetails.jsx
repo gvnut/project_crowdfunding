@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+iimport React, { useState, useEffect } from 'react'
+import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 
@@ -6,11 +7,13 @@ import { useStateContext } from '../context';
 import { CountBox, CustomButton, Loader } from '../components';
 import { calculateBarPercentage, daysLeft } from '../utils';
 import { thirdweb } from '../assets';
+import { navlinks } from '../constants';
 
 const CampaignDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { donate, getDonations, contract, address } = useStateContext();
+  const { connect, donate, getDonations, contract, address } = useStateContext();
+  
 
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
@@ -29,10 +32,14 @@ const CampaignDetails = () => {
   }, [contract, address])
 
   const handleDonate = async () => {
+    if (amount === '') {
+      window.alert('Please enter a donation amount');
+      return;
+    }
     setIsLoading(true);
-
+  
     await donate(state.pId, amount); 
-
+  
     navigate('/')
     setIsLoading(false);
   }
@@ -44,7 +51,7 @@ const CampaignDetails = () => {
       <div className="w-full flex md:flex-row flex-col mt-10 gap-[30px]">
         <div className="flex-1 flex-col">
           <img src={state.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl"/>
-          <div className="relative w-full h-[5px] bg-[#3a3a43] mt-2">
+          <div className="relative w-full h-[20px] bg-[#3a3a43] mt-2">
             <div className="absolute h-full bg-[#4acd8d]" style={{ width: `${calculateBarPercentage(state.target, state.amountCollected)}%`, maxWidth: '100%'}}>
             </div>
           </div>
@@ -106,6 +113,7 @@ const CampaignDetails = () => {
             </p>
             <div className="mt-[30px]">
               <input 
+                
                 type="number"
                 placeholder="ETH 0.1"
                 step="0.01"
@@ -120,11 +128,11 @@ const CampaignDetails = () => {
               </div>
 
               <CustomButton 
-                btnType="button"
-                title="Fund Campaign"
-                styles="w-full bg-[#8c6dfd]"
-                handleClick={handleDonate}
-              />
+  btnType="button"
+  title={address ? 'Fund Campaign' : 'Connect'}
+  styles={address ? 'w-full bg-[#8c6dfd]' : 'bg-[#8c6dfd]'}
+  handleClick={address ? handleDonate : connect}
+/>
             </div>
           </div>
         </div>
